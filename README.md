@@ -4,7 +4,7 @@ An interactive, single-page learning tool covering the **8 pillars of modern AI 
 
 ## Live site
 
-Hosted on GitHub Pages: **https://<your-username>.github.io/ai-engineering-handbook/** _(updated automatically once the repo is created)_
+Hosted on GitHub Pages: **https://s-n00b.github.io/agentic_ai_engineering_handbook/**
 
 ## Features
 
