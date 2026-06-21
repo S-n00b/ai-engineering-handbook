@@ -20,7 +20,7 @@ Hosted on GitHub Pages: **https://s-n00b.github.io/ai-engineering-handbook/**
 
 ## Tech
 
-A single self-contained `ai_engineering_handbook.html` file:
+A single self-contained `index.html` file:
 
 - **React 18** (UMD) + **Babel Standalone** (classic JSX runtime, pinned versions) compiled in-browser.
 - **Tailwind CSS** (CDN) for styling.
@@ -34,7 +34,7 @@ Because it loads libraries from CDNs, an internet connection is required. You ca
 
 ```bash
 python -m http.server 8000
-# then visit http://127.0.0.1:8000/ai_engineering_handbook.html
+# then visit http://127.0.0.1:8000/
 ```
 
 ## License
