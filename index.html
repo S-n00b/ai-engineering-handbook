@@ -819,6 +819,61 @@ function AppendixView({ allConcepts, learnedConcepts }) {
 }
 
 /* ============================================================
+   LIGHTBOX (fullscreen image viewer)
+   ============================================================ */
+function Lightbox({ img, onClose }) {
+  useEffect(() => {
+    const onKey = e => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[60] bg-slate-950/95 glass flex items-center justify-center p-4 sm:p-8 fade-in"
+    >
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+        <a
+          href={img.src}
+          download
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          title="Download image"
+          aria-label="Download image"
+          className="bg-slate-800/90 hover:bg-slate-700 p-2.5 rounded-xl border border-slate-700 text-slate-200 hover:text-amber-400 transition-colors shadow-lg"
+        >
+          <span className="material-symbols-rounded text-[20px] block">download</span>
+        </a>
+        <button
+          onClick={onClose}
+          title="Close (Esc)"
+          aria-label="Close"
+          className="bg-slate-800/90 hover:bg-slate-700 p-2.5 rounded-xl border border-slate-700 text-slate-200 hover:text-white transition-colors shadow-lg"
+        >
+          <span className="material-symbols-rounded text-[20px] block">close</span>
+        </button>
+      </div>
+      <figure onClick={e => e.stopPropagation()} className="max-w-7xl w-full flex flex-col items-center gap-4">
+        <img
+          src={img.src}
+          alt={img.alt}
+          className="max-w-full max-h-[80vh] w-auto h-auto object-contain rounded-xl shadow-2xl border border-slate-700/50"
+        />
+        {img.caption && (
+          <figcaption className="text-slate-300 text-sm sm:text-base italic text-center max-w-3xl leading-relaxed px-2">
+            {img.caption}
+          </figcaption>
+        )}
+      </figure>
+    </div>
+  );
+}
+
+/* ============================================================
    MAIN APP
    ============================================================ */
 function App() {
@@ -827,6 +882,7 @@ function App() {
   const [conceptModal, setConceptModal] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [lightboxImg, setLightboxImg] = useState(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizStartChapter, setQuizStartChapter] = useState(null);
   const [appendixConcept, setAppendixConcept] = useState(null);
@@ -914,6 +970,10 @@ function App() {
           onClose={() => setQuizOpen(false)}
           startChapterId={quizStartChapter}
         />
+      )}
+
+      {lightboxImg && (
+        <Lightbox img={lightboxImg} onClose={() => setLightboxImg(null)} />
       )}
 
       {/* Mobile sidebar backdrop */}
@@ -1053,12 +1113,12 @@ function App() {
           {activeView === 'chapter' && activeChapter && (
             <div key={activeChapterId} className="max-w-6xl mx-auto space-y-10 fade-in pb-12">
 
-              {/* Banner */}
-              <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50 group bg-slate-800">
+              {/* Banner — desktop: text overlaid on image */}
+              <div className="hidden md:block relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50 group bg-slate-800">
                 <img
                   src={activeChapter.bannerImg}
                   alt={activeChapter.title + ' banner'}
-                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 ease-out"
+                  className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-1000 ease-out"
                   onError={e => { e.currentTarget.style.display = 'none'; }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
@@ -1071,6 +1131,30 @@ function App() {
                   </div>
                   <h2 className="text-4xl md:text-5xl font-bold font-serif mb-4 leading-tight drop-shadow-lg">{activeChapter.title}</h2>
                   <p className="text-slate-200 text-sm md:text-base leading-relaxed max-w-3xl font-medium border-l-4 border-[#84A59D] pl-4 bg-slate-900/30 py-2 backdrop-blur-sm rounded-r-xl">
+                    {activeChapter.introMetaphor}
+                  </p>
+                </div>
+              </div>
+
+              {/* Banner — mobile: clean image with hero text below */}
+              <div className="md:hidden">
+                <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 bg-slate-800">
+                  <img
+                    src={activeChapter.bannerImg}
+                    alt={activeChapter.title + ' banner'}
+                    className="w-full h-full object-contain"
+                    onError={e => { e.currentTarget.parentElement.style.display = 'none'; }}
+                  />
+                </div>
+                <div className="mt-5 px-0.5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="material-symbols-rounded text-2xl text-amber-500">{activeChapter.icon}</span>
+                    <span className="text-[11px] font-bold text-amber-700 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full border border-amber-200">
+                      Module {handbookData.chapters.findIndex(c => c.id === activeChapterId) + 1} of 8
+                    </span>
+                  </div>
+                  <h2 className="text-3xl font-bold font-serif mb-3 leading-tight text-slate-800">{activeChapter.title}</h2>
+                  <p className="text-slate-600 text-[15px] italic leading-relaxed font-medium border-l-4 border-[#84A59D] pl-4">
                     {activeChapter.introMetaphor}
                   </p>
                 </div>
@@ -1160,7 +1244,7 @@ function App() {
                   </div>
 
                   <figure className="space-y-4">
-                    <div className="relative w-full rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-slate-700 bg-slate-800">
+                    <div className="relative w-full rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-slate-700 bg-slate-800 group">
                       <img
                         src={activeChapter.palaceImg}
                         alt={activeChapter.title + ' Memory Palace'}
@@ -1168,6 +1252,27 @@ function App() {
                         onError={e => { e.currentTarget.parentElement.style.display = 'none'; }}
                       />
                       <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl pointer-events-none"></div>
+                      <div className="absolute top-3 right-3 flex items-center gap-2 opacity-90 group-hover:opacity-100 transition-opacity">
+                        <a
+                          href={activeChapter.palaceImg}
+                          download
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Download image"
+                          aria-label="Download image"
+                          className="bg-slate-900/80 hover:bg-slate-900 backdrop-blur-md p-2 rounded-lg border border-slate-700/50 text-slate-200 hover:text-amber-400 transition-colors"
+                        >
+                          <span className="material-symbols-rounded text-[18px] block">download</span>
+                        </a>
+                        <button
+                          onClick={() => setLightboxImg({ src: activeChapter.palaceImg, alt: activeChapter.title + ' Memory Palace', caption: activeChapter.palace })}
+                          title="View fullscreen"
+                          aria-label="View fullscreen"
+                          className="bg-slate-900/80 hover:bg-slate-900 backdrop-blur-md p-2 rounded-lg border border-slate-700/50 text-slate-200 hover:text-amber-400 transition-colors"
+                        >
+                          <span className="material-symbols-rounded text-[18px] block">fullscreen</span>
+                        </button>
+                      </div>
                     </div>
                     <figcaption className="bg-slate-900/80 border border-slate-700/50 rounded-2xl p-5 sm:p-6 text-sm sm:text-[15px] italic font-medium text-amber-50 leading-relaxed shadow-inner border-l-4 border-l-amber-500">
                       "{activeChapter.palace}"
