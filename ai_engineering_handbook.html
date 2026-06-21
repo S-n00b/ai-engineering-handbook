@@ -951,7 +951,7 @@ function App() {
                 className={'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left text-sm transition-all duration-200 group ' + (isActive ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-lg shadow-amber-500/20 translate-x-1' : 'text-slate-300 hover:bg-slate-800 hover:text-white hover:translate-x-1')}
               >
                 <span className={'material-symbols-rounded text-[20px] shrink-0 transition-colors ' + (isActive ? 'text-slate-900' : 'text-[#84A59D] group-hover:text-amber-400')}>{ch.icon}</span>
-                <span className="truncate flex-1 tracking-wide">{ch.title}</span>
+                <span className="flex-1 leading-tight">{ch.title}</span>
                 {prog.pct === 100
                   ? <span className="material-symbols-rounded text-[14px] text-emerald-400 shrink-0">check_circle</span>
                   : prog.learned > 0
