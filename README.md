@@ -2,9 +2,11 @@
 
 An interactive, single-page learning tool covering the **8 pillars of modern AI engineering** — 56 core concepts explained through plain-language analogies, technical deep-dives, real-world industry use cases (healthcare, manufacturing, agriculture), and memory-palace retention aids.
 
+![AI Engineering Handbook screenshot](docs/screenshot.png)
+
 ## Live site
 
-Hosted on GitHub Pages: **https://s-n00b.github.io/agentic_ai_engineering_handbook/**
+Hosted on GitHub Pages: **https://s-n00b.github.io/ai-engineering-handbook/**
 
 ## Features
 
