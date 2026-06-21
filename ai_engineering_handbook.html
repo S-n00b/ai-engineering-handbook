@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Engineering Handbook - Master the Essentials</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Pinned to Babel 7.x: its React preset uses the classic JSX runtime (React.createElement),
+         which runs in a plain <script>. Babel 8's default automatic runtime emits ESM imports
+         (react/jsx-runtime) that throw "Cannot use import statement outside a module" here. -->
+    <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fcfbf7; }
+        h1, h2, h3, h4, .font-serif { font-family: 'Playfair Display', serif; }
+        code, pre, .font-mono { font-family: 'Fira Code', monospace; }
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #f1ebd9; }
+        ::-webkit-scrollbar-thumb { background: #84A59D; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #1E293B; }
+        .fade-in { animation: fadeIn 0.35s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .flip-in { animation: flipIn 0.4s ease-out forwards; }
+        @keyframes flipIn { from { opacity: 0; transform: rotateX(-10deg) translateY(10px); } to { opacity: 1; transform: rotateX(0) translateY(0); } }
+        .material-symbols-rounded { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
+        .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1; -webkit-box-orient: vertical; }
+        .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="text-slate-800 antialiased overflow-hidden">
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+/* ============================================================
+   DATA  — 8 chapters, 56 concepts
+   ============================================================ */
+const handbookData = {
+  chapters: [
+    {
+      id: "model-foundations",
+      title: "Model Foundations",
+      icon: "memory",
+      bannerImg: "https://lh3.googleusercontent.com/d/1XdqjYxdMkIX1Phoo00BSq1TU9qWltccp",
+      palaceImg: "https://lh3.googleusercontent.com/d/1sJTylu8wEoPZosnFEGn5Vp-O29McpeeT",
+      palaceTitle: "The Grand Library Lobby",
+      introMetaphor: "Imagine baking a multi-layered cake from a recipe. To bake a great cake, you first need to understand the basic ingredients (like flour and sugar), how they bind together, and the size of your oven. In AI, Model Foundations represent these basic ingredients—they define how a language model translates raw, chaotic human words into mathematics, groups ideas, processes sequences, and outputs text systematically.",
+      concepts: [
+        { name: "Transformers & Attention", analogy: "Like a classroom project where students pay close attention only to specific classmates whose ideas are relevant to their assigned task, completely ignoring the irrelevant background chatter.", explanation: "The Transformer is a neural network architecture that relies on Self-Attention. Attention mechanisms dynamically compute mathematical weights representing how much each word in a sentence relates to every other word, allowing the model to capture long-range contextual relationships instantly.", healthcare: "Analyzing genomic sequences to spot mutated gene segments that work in tandem over vast molecular distances.", manufacturing: "Predicting machine assembly failure by tracking temporal relationships among sensor pulses across weeks of telemetry data.", agriculture: "Analyzing multispectral drone imagery of a vast orchard to detect systemic crop diseases based on spatial correlations between distant trees." },
+        { name: "Tokenization (BPE)", analogy: "Like teaching a language learner to recognize prefixes, roots, and suffixes (such as 'un-', 'forget', '-able') instead of forcing them to memorize millions of whole individual words in a dictionary.", explanation: "Byte-Pair Encoding (BPE) iteratively merges the most frequent pairs of characters or bytes in a corpus, allowing models to process rare words by breaking them into highly frequent subword 'tokens', eliminating out-of-vocabulary errors.", healthcare: "Converting complex medical terminology (e.g., 'electroencephalography') into standardized subword chunks for clinical NLP engines.", manufacturing: "Compressing dense serial industrial protocol codes (like Modbus registry strings) into digestible patterns for anomaly scanners.", agriculture: "Standardizing taxonomical and pesticide chemical naming structures into unified tokens for agricultural advisory agents." },
+        { name: "Embeddings", analogy: "Like representing every student on a map using coordinate points of their interests (Sci-Fi, Sports, Cooking). Similar students naturally sit close together on the map.", explanation: "Embeddings are dense, low-dimensional vector representations of tokens or sentences. By projecting raw text into a high-dimensional mathematical space (often 768–1536 dimensions), words with semantic similarities are clustered closely together, preserving meaning.", healthcare: "Clustering patient diagnosis codes to discover hidden correlations between seemingly unrelated genetic traits and chronic symptoms.", manufacturing: "Mapping acoustic vibration signals from machine bearings onto coordinates to immediately isolate healthy sounds from failing ones.", agriculture: "Mapping soil chemical compositions (N-P-K ratios) and humidity ratings into vector space to group highly compatible plant hybrids." },
+        { name: "Pretraining vs Post-training", analogy: "Pretraining is like reading the entire school library to get basic worldly intelligence. Post-training is sitting down with a focused tutor to learn how to answer test questions politely and accurately.", explanation: "Pretraining trains a raw model on self-supervised data (unlabeled web scrapes) to learn language patterns. Post-training includes Supervised Fine-Tuning (SFT) and alignment (like RLHF) to make the model safe, structured, and helpful.", healthcare: "Pretraining on biomedical libraries (PubMed) to grasp biology, followed by clinical safety training to avoid giving dangerous drug advice.", manufacturing: "Pretraining on global industrial standards, then post-training on confidential machine manuals to perform internal troubleshooting.", agriculture: "Pretraining on generic botany literature, then post-training on localized soil metrics and regional pest guides to act as an expert agronomist." },
+        { name: "Context Window", analogy: "Like your short-term memory capacity while taking a closed-book exam. If you can only remember 5 pages of notes at once, you will forget crucial details on page 6.", explanation: "The context window is the maximum number of tokens a model can process in a single forward pass. It limits how much immediate text history (prompt + completion) the system can dynamically read and write.", healthcare: "Summarizing thousands of pages of a patient's historical multi-year medical record without missing historical surgical notes.", manufacturing: "Analyzing a 24-hour log file containing millions of millisecond-level telemetry messages from a factory assembly line.", agriculture: "Ingesting an entire growing season's worth of meteorological, chemical application, and harvest yield records to generate winter strategies." },
+        { name: "Sampling (Temp/Top-p)", analogy: "Temperature is like how creative a jazz musician is: high temperature means wild improvisation, while low temperature means sticking strictly to the sheet music. Top-p limits the band's instruments to only the top-tier options.", explanation: "Sampling parameters control text generation creativity. Temperature scales raw probability scores (logits); lower values make output deterministic, higher values increase diversity. Top-p (Nucleus Sampling) restricts choices to a dynamic subset of words whose cumulative probability exceeds threshold 'p'.", healthcare: "Setting Temperature to 0.0 for clinical prescription translations to guarantee absolute accuracy, and 0.7 for brainstorming occupational therapy routines.", manufacturing: "Using low temperature to generate strict sequential emergency shutdown checklists, and higher temperature for designing test variations.", agriculture: "Using deterministic sampling for precision pesticide calculation dosages, and creative sampling for designing diverse crop rotation experiments." },
+        { name: "Logits & Probabilities", analogy: "Logits are the raw decibel levels of crowd cheers for different teams. Probabilities are those cheers converted into exact percentage chances of winning, adding up to exactly 100%.", explanation: "Logits are the raw, unnormalized output scores from the neural network's final layer. A Softmax function is applied to normalize them into a probability distribution over the model's vocabulary.", healthcare: "Evaluating logit margins in diagnostic classification models to assess clinician uncertainty when identifying rare tumors on MRI scans.", manufacturing: "Translating raw anomaly classifier scores (logits) into clean percentage risk assessments for conveyor motor burnouts.", agriculture: "Converting raw sensor classification outputs into probability percentages for weed species detection in smart-tractor pesticide spraying." }
+      ],
+      palace: "You walk into a classic academic hall. In the center, a massive rotating spotlight (Attention) illuminates books based on their relevance. Near the doors, a paper-shredder cuts long manuscripts into neat syllable pieces (Tokenization). The floating confetti organizes itself into tight geometric constellations on a 3D hologram (Embeddings). On the left, a wild scholar devours books on the floor, then walks over to sit with a stern private tutor (Pre/Post-training). Above, a sliding glass frame limits how much text is readable at once (Context Window). Near the exit, a roulette wheel (Logits & Probabilities) spins, its speed adjusted by a hot-and-cold dial labeled Temperature (Sampling)."
+    },
+    {
+      id: "inference-serving",
+      title: "Inference & Serving",
+      icon: "bolt",
+      bannerImg: "https://lh3.googleusercontent.com/d/1tUYEvA_Yk2XArlsk0QT472L7l8ycBbvp",
+      palaceImg: "https://lh3.googleusercontent.com/d/1JoTDgfZ93Dyv2yDOT0GpltKkVsd4H3NB",
+      palaceTitle: "The High-Speed Kitchen",
+      introMetaphor: "Imagine running a busy pizza kitchen. You have to prep the dough ahead of time (prefill), then continuously slice and plate pizzas to order (decode). If you don't manage oven space efficiently, the kitchen grinds to a halt. In AI, Inference & Serving is about hosting model weights and delivering rapid predictions to thousands of users simultaneously while maximizing expensive GPU hardware resources.",
+      concepts: [
+        { name: "Prefill vs Decode", analogy: "Prefill is the chef reading the entire pizza order sheet at once to prepare the ingredients. Decode is squeezing out the marinara sauce drop-by-drop as each pizza moves sequentially down the line.", explanation: "The LLM generation process consists of two distinct phases. Prefill ingests the entire input prompt in parallel, computing Key-Value tensors. Decode generates subsequent output tokens one-by-one, which is sequentially bound and memory-bandwidth constrained.", healthcare: "Prefill processes a massive 10-page radiology report in parallel, then Decode streams out the step-by-step diagnostic recommendation bullets.", manufacturing: "Prefill evaluates a multi-channel time-series machine log, and Decode generates the natural-language maintenance plan.", agriculture: "Prefill reads a seasonal farm history report, and Decode outputs real-time weekly irrigation recommendations." },
+        { name: "KV Cache", analogy: "Like a chef keeping pre-chopped onions in a small bowl right next to them, instead of peeling and chopping a fresh onion from scratch every single time they plate a new slice.", explanation: "Key-Value (KV) Caching stores the calculated self-attention states of past tokens in GPU memory, preventing the model from recalculating attention states for existing context during every sequential decode step.", healthcare: "Enabling rapid interactive clinical chat assistants by caching patient symptoms and history between conversational turns.", manufacturing: "Speeding up real-time edge processing units checking assembly faults by caching baseline static manufacturing parameters.", agriculture: "Powering responsive field agronomy query apps in remote areas with slow satellite connections by keeping context tensors cached locally." },
+        { name: "Prompt/Prefix Caching", analogy: "Like a pizzeria pre-baking standard cheese bases in large batches, so they only need to add custom toppings when individual orders come in.", explanation: "Prompt/Prefix Caching saves the KV cache states of long, static prompt prefixes (like massive system instructions). Subsequent user queries that share this prefix skip the prefill computation completely.", healthcare: "Caching the entire 50,000-word national diagnostic handbook so clinicians can run sub-second queries against medical standards.", manufacturing: "Caching complete factory equipment compliance manuals, allowing engineers to query specific maintenance protocols instantly.", agriculture: "Caching historical climate tables and region-specific pesticide regulations for fast on-the-go crop treatment planning." },
+        { name: "Speculative Decoding", analogy: "Like a hyperactive, fast apprentice guessing the ingredients and assembling a pizza quickly, and the master chef just looking it over to instantly approve or reject/correct it.", explanation: "Speculative Decoding speeds up generation by using a small, cheap 'draft' model to speculatively generate a sequence of tokens, verified in a single parallel step by the primary, accurate 'target' model.", healthcare: "Powering real-time surgical voice transcription where high latency is unacceptable, using a draft model to speed up speech capture.", manufacturing: "Enabling fast safety-critical diagnostic outputs during factory machine alarms using compact edge target verification.", agriculture: "Running immediate real-time leaf disease diagnostics on rural mobile devices using a draft model backed by a remote main server." },
+        { name: "Continuous Batching", analogy: "Instead of waiting for 10 pizzas to finish baking before putting 10 new ones in, the chef slips new pizzas into the oven the second any single pizza is pulled out.", explanation: "Unlike static batching which waits for all requests to finish, Continuous Batching schedules requests at the token level. As soon as a sequence completes, a new request is dynamically scheduled, increasing GPU throughput.", healthcare: "Managing hundreds of concurrent hospital admissions queries, prioritizing urgent triage queries without stalling background admin tasks.", manufacturing: "Streaming continuous anomaly-detection inferences for thousands of independent factory-floor conveyor belt cameras simultaneously.", agriculture: "Processing real-time telemetry inputs from a fleet of 500 autonomous harvesters operating concurrently across a cooperative." },
+        { name: "Quantization (FP8/AWQ)", analogy: "Like shipping ingredients in compressed, space-saving boxes instead of giant loosely packed crates, sacrificing a tiny bit of precision for triple the delivery speed.", explanation: "Quantization reduces the numerical precision of model weights (e.g., from 16-bit to 8-bit or 4-bit formats), shrinking memory footprint, accelerating inference, and fitting large models on cheaper, smaller GPUs.", healthcare: "Deploying highly capable clinical models directly onto small, fanless medical-cart computers inside sterile hospital rooms.", manufacturing: "Deploying real-time predictive defect scanners on vibration-resistant, low-power edge computers installed inside industrial robotic arms.", agriculture: "Fitting complete soil-diagnostic LLMs directly onto local, internet-independent tractor hardware devices operating in remote fields." },
+        { name: "PagedAttention / vLLM", analogy: "Like a smart restaurant reservation system that splits large party tables across the restaurant wherever there's a free seat, instead of leaving tables empty because a single massive 20-person table isn't available.", explanation: "Inspired by OS virtual memory paging, PagedAttention partitions the KV cache into non-contiguous physical memory blocks. This eliminates external memory fragmentation and allows safe multi-user KV cache sharing.", healthcare: "Enabling reliable high-volume patient portal chats without running out of server memory during peak flu season.", manufacturing: "Hosting centralized factory-monitoring models with highly variable concurrent connection spikes without OOM crashes.", agriculture: "Aggregating telemetry from thousands of small IoT soil sensors, dynamically managing memory buffers during peak morning data uploads." },
+        { name: "TTFT / TPOT & Latency", analogy: "TTFT is how long you wait before the waiter brings the first breadbasket; TPOT is the steady, rhythmic pace at which they bring subsequent courses.", explanation: "Time to First Token (TTFT) measures prompt processing speed (prefill efficiency). Time Per Output Token (TPOT) measures generation speed per character (decode efficiency). Together they determine the interactive feel and latency of an AI system.", healthcare: "Optimizing emergency room diagnostic search tools for low TTFT so critical patient historical information renders in milliseconds.", manufacturing: "Ensuring low TPOT on control panels to stream instructions instantly during fast-moving industrial failures.", agriculture: "Tuning low-latency systems for autonomous weed-zapping lasers that require millisecond-level target-generation times." }
+      ],
+      palace: "A bustling pizzeria with a roaring brick oven. A chef preps full dough bases at once while a device squeezes toppings drop-by-drop (Prefill vs Decode). Labeled Tupperware holds pre-sliced ingredients (KV Cache). Pre-baked plain cheese crusts sit on shelves (Prompt Caching). A frantic assistant cooks ahead while a calm master chef approves or discards with a nod (Speculative Decoding). The oven uses rotating independent racks that slide pies in and out the moment they're ready (Continuous Batching). All ingredients are vacuum-sealed in tiny dense cubes (Quantization). A digital seating chart groups dining parties dynamically (PagedAttention). Above the serving window, a dual-stopwatch tracks the breadbasket arrival and subsequent course pace (TTFT & TPOT)."
+    },
+    {
+      id: "context-engineering",
+      title: "Context Engineering",
+      icon: "inventory_2",
+      bannerImg: "https://lh3.googleusercontent.com/d/1eswYfSAyONqe6PRXj4DYy6e_8SZl36yX",
+      palaceImg: "https://lh3.googleusercontent.com/d/1m7GC_8FdcGB86xeovv1vmCrXEYBFDt0P",
+      palaceTitle: "The Student Study Lounge",
+      introMetaphor: "Imagine packing a backpack for school. You have to decide what textbooks to keep, what old scrap paper to throw away, and how to condense notes into tiny study cards so your bag doesn't get too heavy to carry. In AI, Context Engineering is about carefully selecting, compressing, organizing, and refreshing the information you feed into a model's prompt to ensure fast, cheap, and accurate answers.",
+      concepts: [
+        { name: "Context Budgeting", analogy: "Like packing exactly under 50 pounds for a flight's luggage limit to avoid paying steep penalty fees while still packing your essential gear.", explanation: "Context Budgeting is the deliberate restriction and management of the input prompt length to optimize compute costs, prevent latency inflation, and avoid performance degradation from bloated prompts.", healthcare: "Selecting only the most relevant recent patient history notes rather than exporting a raw, expensive 100,000-word EMR file.", manufacturing: "Filtering high-rate industrial telemetry data down to critical anomalies before sending it to a remote monitoring LLM.", agriculture: "Trimming down regional multi-year climate histories to focus strictly on relevant drought periods when planning seasonal crop strategies." },
+        { name: "Context Rot", analogy: "Like keeping old grocery receipts and expired coupons in your wallet until you can't find your active driver's license because of all the garbage.", explanation: "Context Rot refers to the dilution of vital information within a long-running conversation as history accumulates irrelevant, repetitive, or outdated interactions, confusing the model's focus.", healthcare: "Clearing out repetitive standard triage disclaimers from an active multi-day clinical discussion session to focus on changing vitals.", manufacturing: "Pruning repetitive, benign status messages from a continuous hardware repair log to prevent diagnostics dilution.", agriculture: "Removing old weather forecasts from previous weeks in an active planning loop, replacing them with current daily conditions." },
+        { name: "Lost in the Middle", analogy: "Like putting your most important study sheet right in the middle of a thick 3-inch binder; you're likely to overlook it because you only glance at the front and back pages.", explanation: "LLMs naturally identify information at the absolute beginning or end of their input contexts much better than information placed in the middle. Context length scaling amplifies this performance drop.", healthcare: "Ensuring critical patient drug allergies are injected at the absolute top of the system prompt to guarantee the safety engine never misses them.", manufacturing: "Placing the specific malfunctioning sensor's ID at the top of the diagnostic query instead of deep inside a dense system dump.", agriculture: "Placing specific field soil toxicity reports at the beginning of the retrieval packet to prevent the model from ignoring the warning." },
+        { name: "Compaction & Summarization", analogy: "Like squeezing a 10-page textbook chapter into a neat index card of bullet points, keeping the core message completely intact.", explanation: "Compaction uses secondary models to pre-process, compress, or rewrite long context lists into dense summaries before sending them to the primary, high-compute reasoning model.", healthcare: "Condensing a patient's multi-volume psychiatric session transcripts into a concise, clinically structured timeline.", manufacturing: "Compacting a massive 12-hour engine telemetry log into a brief technical report on abnormal motor vibrations.", agriculture: "Summarizing extensive regional farming pesticide compliance documents into a brief compliance checklist." },
+        { name: "Context Offloading", analogy: "Like leaving your heavy biology textbooks in your school locker (cheap storage) and only grabbing them when you absolutely need to read a page.", explanation: "Context Offloading swaps active prompt components (such as memory records or long instructions) to cheaper storage tiers and loads them only when triggered.", healthcare: "Keeping historical patient charts on server disk databases, loading them into active model memory only when discussing prior histories.", manufacturing: "Offloading long, rarely used machine wiring diagrams to localized storage, pulling them during active machine fault warnings.", agriculture: "Storing global agricultural seed directories on disk, pulling specific crop traits dynamically into active prompts during hybridization queries." },
+        { name: "Just-in-time Retrieval", analogy: "Like a classmate whispering the exact formula to you right before the teacher calls on you, instead of trying to memorize the whole textbook.", explanation: "Just-in-time (JIT) retrieval dynamically fetches highly specific, localized context segments right before the model executes its reasoning step, minimizing prompt bloating.", healthcare: "Retrieving the exact, updated drug interaction warning guidelines the second a physician drafts a prescription.", manufacturing: "Injecting the exact real-time calibration values of a laser cutting tool right as the model designs a cutting instruction.", agriculture: "Injecting live localized soil moisture and rainfall telemetry at the moment of generating an automated drone flight plan." },
+        { name: "Structured Note-Taking", analogy: "Organizing your binder with clean, color-coded tabs and bulleted lists instead of writing a single, continuous, chaotic stream-of-consciousness paragraph.", explanation: "Structured Note-Taking formats and parses raw retrieved data into clean, machine-readable syntax templates (like JSON, XML, or Markdown) before injection, helping the model parse key variables reliably.", healthcare: "Formatting patient vitals, symptoms, and histories into strict XML trees to ensure clinical reasoning chains are grounded.", manufacturing: "Parsing disorganized raw factory sensor logs into clean tabular Markdown formats before performing predictive maintenance analysis.", agriculture: "Organizing multi-field crop health parameters into strict JSON payloads to feed into ag-economic decision engines." }
+      ],
+      palace: "A modern study room with a heavy oak desk. A mechanical scale weighs a backpack, ensuring it stays under a strict limit (Context Budgeting). Under the desk, a trash can overflows with moldy sandwiches and outdated homework (Context Rot). A giant sandwich where the meat in the middle has completely fallen out, leaving only bread on the ends (Lost in the Middle). To the right, a high-tech hydraulic press crushes a thick book into a single glowing index card (Compaction). Along the back wall, a row of metal lockers stores heavy binders for later retrieval (Context Offloading). A classmate stands by the door, ready to whisper a vital hint through an earpiece just as you sit down (Just-in-time Retrieval). On the whiteboard, notes are organized with perfect color-coded dividers, borders, and templates (Structured Note-Taking)."
+    },
+    {
+      id: "agents-harness",
+      title: "Agents & Harness Engineering",
+      icon: "smart_toy",
+      bannerImg: "https://lh3.googleusercontent.com/d/16N1_MHv0YwlqSMUOkhoM5RIhc4wpTP9H",
+      palaceImg: "https://lh3.googleusercontent.com/d/1fcK5phbFkSuUyE-RbED2eNtjWX7S_BHA",
+      palaceTitle: "The Automated Control Room",
+      introMetaphor: "Imagine building a self-operating smart home robot. Instead of just playing music on a simple voice command, this robot needs to think about how to clean a spilled juice box, pick out a rag, wipe the tiles, check if the floor is still sticky, and safely park itself back at its charger. Agents & Harness Engineering is the design of the surrounding code loop, tools, protocols, and safety rails that turn a static text-generating model into an active, decision-making, digital employee.",
+      concepts: [
+        { name: "Agent Loop (ReAct/TAO)", analogy: "Like a detective working a case: first they think ('I need to check for fingerprints'), then they act ('sprinkle dust on the doorknob'), and finally they observe ('there's a thumbprint!'), repeating this circle until the mystery is solved.", explanation: "The Agent Loop (Reason + Act) forces the model to interleave thought generation with action execution, documenting its internal logic prior to calling external systems and evaluating the returned observations.", healthcare: "An agent analyzing complex lab work by thinking through diagnostic possibilities, querying medical databases, and analyzing results.", manufacturing: "An agent resolving industrial line stoppages by checking diagnostic registers, calling PLC diagnostic tools, and observing responses.", agriculture: "An autonomous agent managing a smart orchard system by analyzing satellite photos, querying soil sensors, and dispatching targeted water valves." },
+        { name: "Tool Use & Function Calling", analogy: "Like a professional handyman selecting a high-powered electric drill from their toolkit, instead of trying to twist a screw into the wall using only their bare fingernails.", explanation: "Tool Use enables LLMs to interface with the physical and digital world. The model generates structured API requests (often JSON payloads) mapping to specific functions, which are executed by the system on behalf of the model.", healthcare: "An LLM assistant writing structured queries to patient databases to pull lab histories or scheduling follow-ups automatically.", manufacturing: "A predictive maintenance model calling a physical PLC controller function to shut down an overheating conveyor motor.", agriculture: "An agronomy advisor calling a localized weather API to pull the upcoming 3-day precipitation forecast for irrigation planning." },
+        { name: "Thin vs Thick Harness", analogy: "A thin harness is like handing a driver a steering wheel and leaving everything to them. A thick harness is a self-driving cockpit with lane assists, backup cameras, and automatic crash avoidance shielding the driver.", explanation: "A Harness is the application environment surrounding an LLM. A 'Thin' harness relies entirely on the model's raw reasoning to navigate actions, whereas a 'Thick' harness uses deterministic hard-coded state machines, validation logic, and safe pathways to orchestrate and bound model actions.", healthcare: "Using a Thick Harness to strictly intercept and block any patient drug instructions generated by the model that contradict the EHR database.", manufacturing: "Deploying a Thick Harness around robotic arm commands to physically restrict coordinate ranges, preventing dangerous manual collisions.", agriculture: "A Thick Harness bounding automated irrigation schedules, preventing the model from accidentally draining water reservoirs due to hallucinations." },
+        { name: "Subagents & Orchestration", analogy: "Like a manager delegating tasks to a specialized graphic designer, a copywriter, and an editor, reviewing their work, and combining them into a final proposal.", explanation: "Subagents divide complex workflows into specialized, isolated agent nodes. An orchestrator coordinates tasks, passing structured inputs to subagents and consolidating their outputs to complete high-complexity processes.", healthcare: "An orchestration system managing a cardiology triage subagent, an insurance validation subagent, and a scheduling subagent.", manufacturing: "Orchestrating a material-purchasing subagent, a machine-scheduling subagent, and a QA verification subagent to automate custom orders.", agriculture: "Orchestrating drone imaging subagents, weather tracking subagents, and automated fertilizing subagents to run crop optimization." },
+        { name: "MCP (Model Context Protocol)", analogy: "A standardized, universal power adapter plug that fits every wall outlet in the world, allowing you to power your laptop, hair dryer, or phone anywhere.", explanation: "Model Context Protocol (MCP) is an open-standard communication protocol that simplifies how AI models connect to secure data sources, development environments, and software APIs, eliminating custom integration code.", healthcare: "Allowing a diagnostic assistant to connect securely and universally to diverse EMR software databases across different hospital networks.", manufacturing: "Integrating an AI supervisor with industrial ERP and MES software frameworks via a unified API standard.", agriculture: "Enabling crop management systems to query diverse IoT soil sensors, tractor telemetry units, and weather stations via a standard communication protocol." },
+        { name: "Skills, Hooks & State", analogy: "Skills are the tools the robot knows how to use; Hooks are tripwire alarms that trigger actions automatically; State is the robot's running memory of what it was doing before it got interrupted.", explanation: "Skills represent reusable function packages. Hooks are system events that intercept agent execution. State is the persistent execution history (variables, goals, memory) maintained across sessions.", healthcare: "An agent using its 'Rx verification' skill, triggered by a 'Prescription Drafted' hook, while preserving patient state context.", manufacturing: "Triggering a 'Thermal Alarm' hook that halts active assembly tasks (preserving tool state) and runs a diagnostic skill.", agriculture: "An agent tracking 'Harvest Progress State', utilizing a 'Rain Alert' hook to trigger its automated plastic-tarp deploy skill." },
+        { name: "Planning vs Reacting", analogy: "Planning is plotting your complete, step-by-step road trip route on GPS before you back out of the driveway; Reacting is slamming on the brakes when a dog suddenly runs into the street.", explanation: "Planning involves compiling sequential milestones before taking any action. Reacting bypasses long-term plans to respond immediately to unexpected environmental feedbacks, error codes, or changes in state.", healthcare: "Drafting a 3-month physical therapy schedule (Planning), but immediately adjusting exercises if the patient complains of sudden sharp pain (Reacting).", manufacturing: "Scheduling a factory maintenance shutdown (Planning), but instantly shifting production routes when an electric transformer blows (Reacting).", agriculture: "Mapping out a 5-day planting schedule (Planning), but halting tractor deployments when unpredicted torrential rain strikes (Reacting)." },
+        { name: "Verification Loops", analogy: "Like a baker double-checking if a cake is fully baked inside by sticking a clean toothpick into the center before taking it out of the oven to serve.", explanation: "Verification Loops use deterministic checkers or separate evaluator LLMs to audit, test, and score an agent's work-in-progress output, sending it back for corrections if it fails quality thresholds.", healthcare: "A clinical agent checking drafted patient discharge summaries against original laboratory reports to guarantee zero metric typos.", manufacturing: "An AI system verifying CNC machine code by running it through a virtual physics-based simulator before sending it to the real machine.", agriculture: "An autonomous drone crop-sprayer agent verifying targets by running an image analysis loop before executing pesticide release." }
+      ],
+      palace: "A high-tech laboratory. In the center, a robotic detective walks in a circle, thinking, acting with a tool, and looking through a magnifying glass (Agent Loop). Behind him, a massive pegboard holds shiny tools, each in an outlined slot (Tool Use). On a platform, a tiny go-kart frame sits next to a heavily armored tank with radar and airbags (Thin vs Thick Harness). Above, a conductor robot directs three small assistant droids playing different instruments (Subagents & Orchestration). A glowing, universal multi-plug outlet powers various appliances (MCP). On a clipboard, the robot's current status is recorded next to an active tripwire hook (Skills, Hooks & State). On the main screen, a dotted map route is suddenly rerouted by a red alert flashing (Planning vs Reacting). At the doorway, a robot checker sticks a probe into finished products before letting them leave (Verification Loops)."
+    },
+    {
+      id: "retrieval-memory",
+      title: "Retrieval & Memory",
+      icon: "manage_search",
+      bannerImg: "https://lh3.googleusercontent.com/d/1nKnPtxWS8yqe0bQn6HDWI_XDp63AVpCH",
+      palaceImg: "https://lh3.googleusercontent.com/d/1vBbU1DKV4NYmMppBWErsJlx1mBD1jcRH",
+      palaceTitle: "The Archival Vault",
+      introMetaphor: "Imagine taking an open-book history exam in a giant, high-tech library. You don't need to memorize every page in the library ahead of time. Instead, you need a highly efficient librarian who can look up your test questions, find the exact paragraphs in the best books, and hand them to you so you can write a perfect essay. In AI, Retrieval & Memory is how models find and remember external facts on the fly.",
+      concepts: [
+        { name: "RAG Pipelines", analogy: "Like taking an open-book test: instead of guessing, you search the textbook, find the right section, read it, and then draft a factual answer.", explanation: "Retrieval-Augmented Generation (RAG) retrieves relevant documents from an external knowledge base based on user queries and appends them to the LLM's context prompt, grounding its response in verified facts.", healthcare: "Powering clinical decision tools that pull recent medical study papers and patient vitals to draft safe clinical diagnostic options.", manufacturing: "Retrieving specific repair instructions from 20,000 pages of manual PDFs when a technician queries an equipment error code.", agriculture: "Answering farmer crop queries by fetching soil, pesticide, and regional yield guidelines from localized government databases." },
+        { name: "Chunking & Re-ranking", analogy: "Chunking is cutting a massive 500-page textbook into separate, easy-to-read index cards. Re-ranking is taking the top 10 relevant cards and ordering them so the most important card sits right on top.", explanation: "Chunking slices raw text documents into optimal token segments (e.g., paragraphs). Re-ranking uses secondary cross-encoder models to re-evaluate and sort these retrieved chunks, ensuring the most semantically relevant data is at the top of the prompt context.", healthcare: "Chunking patient medical records by clinical encounter, then re-ranking them to put recent lab results on top for oncology queries.", manufacturing: "Chunking mechanical failure logs by incident ID, and re-ranking them to display the exact root-cause resolution.", agriculture: "Slicing regional weather history into monthly chunks, and re-ranking them to prioritize years with matching drought profiles." },
+        { name: "Vector Database", analogy: "A high-tech library where books are organized by conceptual meaning rather than alphabetically — so a book on 'happy puppies' sits right next to 'playful golden retrievers' because their ideas are identical.", explanation: "Vector Databases store and index multi-dimensional embeddings representing the semantic meaning of chunks. They execute extremely fast similarity searches (using algorithms like HNSW) to find relevant data.", healthcare: "Searching patient profiles by semantic symptom descriptions to find historically similar clinical cases across a hospital network.", manufacturing: "Querying maintenance logs with verbal technician problem descriptions to find matching engineering writeups.", agriculture: "Matching current satellite crop distress profiles with historical aerial crop signatures to diagnose plant diseases." },
+        { name: "Hybrid Search", analogy: "Searching the library by both exact keyword search (like looking up the word 'Photosynthesis') and semantic meaning (like searching for 'how plants convert sunlight to food').", explanation: "Hybrid Search combines keyword-based search (BM25/TF-IDF) with vector-based similarity search, merge-ranking the results using Reciprocal Rank Fusion to leverage both exact keyword matches and conceptual meanings.", healthcare: "Finding specific patient records using both exact drug brand names (keyword) and overall physical symptoms (semantic vector).", manufacturing: "Locating factory part failures using exact part numbers (keyword) along with descriptive descriptions of the breakdown (semantic vector).", agriculture: "Searching agricultural pest databases by exact pesticide chemical formula (keyword) and plant symptoms (semantic vector)." },
+        { name: "Knowledge Graphs", analogy: "Like a detective's bulletin board where colored pins (representing suspects) are connected by strings (labeled with relationships like 'partner of' or 'seen with').", explanation: "Knowledge Graphs store facts as structured networks of 'nodes' (entities like people, concepts, or parts) connected by 'edges' (explicit relationships), enabling reasoning across multi-hop connections.", healthcare: "Mapping complex relationships between biological pathways, symptoms, and drug molecular targets to identify novel off-label treatment uses.", manufacturing: "Modeling complex bill-of-materials dependencies to show exactly how a shortage of a single capacitor halts multiple assemblies.", agriculture: "Mapping ecosystems of plant species, soil organisms, chemical treatments, and pests to model natural companion planting." },
+        { name: "Episodic / Temporal Memory", analogy: "Episodic memory is remembering what you and the user talked about 5 minutes ago in this chat; Temporal memory is understanding the correct timeline of when things happened.", explanation: "Episodic Memory tracks conversational history and user-specific events over time, while Temporal Memory tags these memories with timestamps to maintain chronological awareness and historical facts.", healthcare: "Tracking a patient's cognitive timeline during therapy, ensuring the assistant remembers prior behavioral milestones.", manufacturing: "Remembering a sequence of subtle gear speed variations across three hours of machine operations to diagnose tool wear.", agriculture: "Maintaining a timeline of seasonal fertilizer application cycles to prevent over-fertilization advice during subsequent farming queries." },
+        { name: "Agentic Retrieval", analogy: "Instead of searching the library catalog yourself, sending a miniature Sherlock Holmes into the library to search, cross-reference sources, rewrite queries, and bring back a complete case folder.", explanation: "Agentic Retrieval uses a model loop to actively evaluate and adjust its own retrieval strategy. The agent can write queries, evaluate the quality of retrieved chunks, rewrite queries, and crawl linked documents.", healthcare: "A clinical agent querying medical registries, validating drug guidelines across multiple sources, and compiling a comprehensive diagnostic summary.", manufacturing: "An agent tracking complex aerospace parts, querying ERP systems, reading supplier manuals, and compiling a root-cause dossier.", agriculture: "An agronomy agent checking live soil sensors, querying historical weather API databases, and analyzing pest manuals to write treatment plans." }
+      ],
+      palace: "A pristine, secure archival vault. A robotic hand pulls a specific folder to hand to a waiting clerk (RAG). At a workbench, a paper cutter cuts long files into squares, which a sorting machine stacks with the most important file on top (Chunking & Re-ranking). Books float in mid-air in a 3D coordinate map, grouped by content similarity (Vector Database). An archivist uses two magnifying glasses — one reading exact keywords, the other reading conceptual ideas (Hybrid Search). A massive wall displays a glowing network of red and blue strings connecting pins on a board (Knowledge Graphs). Along the floor, a ticking clock runs parallel to a physical film strip of past conversations (Episodic/Temporal Memory). A tiny robotic detective with a notebook climbs shelves, pulling books and cross-referencing indexes independently (Agentic Retrieval)."
+    },
+    {
+      id: "adaptation-training",
+      title: "Adaptation & Training",
+      icon: "model_training",
+      bannerImg: "https://lh3.googleusercontent.com/d/1JahVCfb0LC5CGXD-MMu4XBe2gZrKsJ5a",
+      palaceImg: "https://lh3.googleusercontent.com/d/18dUqDUArT-igwOPRy0-vcl_0C2xO5rTN",
+      palaceTitle: "The Academy Training Yard",
+      introMetaphor: "Imagine teaching a family dog new tricks. You start with a general well-behaved dog, but to make it a police dog, a competitive agility champion, or a specialized guide dog, you need highly focused, structured training routines. Adaptation & Training is how we update a model's weights to specialized workflows, adjust its behavior, and squeeze advanced capabilities into smaller models.",
+      concepts: [
+        { name: "Fine-tuning (SFT)", analogy: "Like giving a student a comprehensive study guide of practice exam questions along with their exact answers so they learn the correct format of how they are expected to answer.", explanation: "Supervised Fine-Tuning (SFT) trains a pretrained model on a curated dataset of instruction-response pairs, adapting its language pattern, formatting, tone, and specific domain understanding.", healthcare: "Training a general LLM on a clinical database of doctor-patient notes to generate structured clinical summaries.", manufacturing: "Fine-tuning an LLM on historical factory machine incident report drafts to automate production line reporting templates.", agriculture: "Adapting an AI model to write crop diagnostics using highly structured agricultural extension bulletins." },
+        { name: "LoRA / QLoRA (PEFT)", analogy: "Instead of rebuilding the entire brain of the dog, you clip a tiny smart collar around its neck that gently corrects its movements, saving massive amounts of energy.", explanation: "Low-Rank Adaptation (LoRA) freeze-dries the original model weights and injects small, trainable rank-decomposition matrices into attention layers. QLoRA quantizes the base model to 4-bit first, allowing fine-tuning on consumer-grade hardware.", healthcare: "Adapting a medical model to classify regional disease symptoms on a single affordable clinic GPU card.", manufacturing: "Updating factory-monitoring models on localized machinery changes using cheap, low-compute edge devices.", agriculture: "Deploying and updating specialized pest-identification models on low-power mobile ag-computers." },
+        { name: "RLHF / DPO", analogy: "RLHF is like a trainer giving a dog a treat when it sits and saying 'no' when it jumps. DPO is presenting the dog with two outcomes and teaching it to choose the better one directly.", explanation: "Reinforcement Learning from Human Feedback (RLHF) uses an auxiliary reward model scoring outputs to align LLMs. Direct Preference Optimization (DPO) simplifies this by directly optimizing the model on binary preference pairs (chosen vs rejected) without a separate reward model.", healthcare: "Aligning medical bots to choose highly conservative, clinically safe drug dosing suggestions over riskier experimental options.", manufacturing: "Training maintenance assistants to output highly detailed step-by-step safety steps instead of short, hasty procedures.", agriculture: "Aligning advisory chatbots to prioritize sustainable organic farming strategies when presented with high-chemical pesticide options." },
+        { name: "GRPO & Reward Models", analogy: "Like scoring a gymnastics competition where you evaluate a group of gymnasts together and reward the ones who perform better relative to the group's average.", explanation: "Group Relative Policy Optimization (GRPO), popularized by DeepSeek, optimizes reinforcement learning by evaluating a group of candidate outputs together, computing relative scores across the group, and eliminating the need for massive, memory-heavy reward models.", healthcare: "Evaluating multiple draft medical treatment plans side-by-side, rewarding the plan that has the fewest drug conflicts.", manufacturing: "Generating multiple automated PLC machine instruction drafts and reinforcing the candidate that minimizes tool-wear indicators.", agriculture: "Evaluating multiple simulated irrigation plans, rewarding the schedule that maximizes water conservation." },
+        { name: "Distillation", analogy: "Like a brilliant physics professor writing a simplified, crystal-clear 10-page workbook so a high school student can quickly learn the core concepts without reading a 1,500-page textbook.", explanation: "Knowledge Distillation transfers capabilities from a massive, highly capable 'teacher' model (like GPT-4) to a compact, fast 'student' model by training the student on the teacher's probability outputs or reasoning chains.", healthcare: "Shrinking a clinical diagnostic model to run fast on local bedside tablets in offline field hospitals.", manufacturing: "Compressing a giant predictive maintenance AI model into a lightweight, sub-millisecond edge checker for assembly lines.", agriculture: "Distilling a massive agronomist planning system into a lightweight mobile app that works offline in rural fields." },
+        { name: "Synthetic Data", analogy: "Like using a high-fidelity flight simulator to train airline pilots, allowing the computer to safely generate millions of extreme scenarios that are too dangerous to try in real life.", explanation: "Synthetic Data involves using highly capable models to generate massive volumes of high-quality training text, code, or instruction pairs. When filtered and verified, this data trains other models without relying on scarce human-labeled data.", healthcare: "Generating billions of synthetic patient records with diverse, non-real medical histories to train diagnostic models without violating privacy laws.", manufacturing: "Simulating extreme, rare factory accident logs and pipeline ruptures to train predictive safety-monitoring AI agents.", agriculture: "Generating virtual soil depletion and drought scenarios to train seasonal crop yield prediction models." }
+      ],
+      palace: "A sunny outdoor training yard. In one corner, a student copies QA pairs from a blackboard into a workbook (SFT). Next to them, a massive robot is fitted with a tiny, glowing clip-on processor badge that changes its operating mode (LoRA/QLoRA). In the center, a coach uses a thumbs-up and thumbs-down scale to feed treats to a training dog (RLHF/DPO). On a platform, a group of gymnasts is judged together, receiving relative medals based on their peers (GRPO). Near the gate, a massive brain pours its glowing liquid knowledge through a golden funnel directly into a smaller, compact brain (Distillation). In the background, a high-tech hologram projector simulates virtual obstacles, extreme weather, and falling trees for students to navigate (Synthetic Data)."
+    },
+    {
+      id: "evaluation-observability",
+      title: "Evaluation & Observability",
+      icon: "analytics",
+      bannerImg: "https://lh3.googleusercontent.com/d/17wz-6EmV8uEJxiDO6gFTvo3wHX2iLyfY",
+      palaceImg: "https://lh3.googleusercontent.com/d/1FOhMUWHIsLFgQ0tuedHkBtEEHs5lcgNE",
+      palaceTitle: "The Observatory Tower",
+      introMetaphor: "Imagine being a school principal. You need to review practice tests before school starts, check security cameras to watch students, track school spending, and make sure that learning a new history fact doesn't cause a student to forget basic math. Evaluation & Observability is how we measure an AI's accuracy, track its runtime steps, manage API costs, and detect hidden failures in production.",
+      concepts: [
+        { name: "Offline vs Online Evals", analogy: "Offline evals are practice exams taken in an empty, quiet classroom before the semester starts; Online evals are grading students' actual behavior and reactions during real active school days.", explanation: "Offline Evals run models against static, curated benchmark datasets (e.g., MMLU, GSM8k) in development environments. Online Evals continuously monitor production models, analyzing user feedback, thumbs-up clicks, and latency metrics.", healthcare: "Offline: Testing a diagnostic assistant against 5,000 historical medical test cases. Online: Monitoring real-time physician feedback on draft summaries.", manufacturing: "Offline: Evaluating defect scanners against historical photos. Online: Monitoring live scrap rates on active assembly conveyor lines.", agriculture: "Offline: Testing yield engines against 10 years of farm data. Online: Monitoring live recommendations against harvest reports." },
+        { name: "LLM-as-Judge", analogy: "Using an exceptionally smart, honor-roll senior student to grade the homework worksheets of freshman students to save the busy teacher's time.", explanation: "LLM-as-Judge uses highly capable models (like Claude 3.5 Sonnet or GPT-4) to grade and evaluate output quality, alignment, and safety metrics of other models, achieving high correlation with human grading at a fraction of the cost.", healthcare: "Using GPT-4 to review draft clinical discharge notes, grading them on medical terminology, clarity, and safety guidelines.", manufacturing: "Using an advanced LLM to grade draft technical reports written by edge models monitoring equipment performance.", agriculture: "Using a centralized expert LLM to audit agricultural advice drafted by regional field chatbots for pesticide safety." },
+        { name: "Agent Trajectory Eval", analogy: "Instead of just looking at the final answer of a math problem, reviewing every single step of work written out in the margins to see where the student made a mistake.", explanation: "Trajectory Evaluation audits the sequence of actions, tool calls, thoughts, and observations an agent executed to reach its final answer, pinpointing exactly where in the loop an agent veered off-track.", healthcare: "Auditing a diagnostic agent's step-by-step logic of which databases it queried, validating if it reviewed drug allergies before suggesting therapy.", manufacturing: "Reviewing an industrial automation agent's sequential tool calls to see why it bypassed the standard safety shutdown routine.", agriculture: "Analyzing a drone planning agent's step-by-step route and sensor queries to discover why it miscalculated water distribution." },
+        { name: "Tracking & Spans", analogy: "Like a GPS tracker showing exactly which streets, highways, and stoplights a delivery truck took to get to your house, detailing how much time was spent at each stop.", explanation: "Tracing captures the execution flow of an LLM application, dividing the request into nested 'Spans' (retrieval time, embedding generation, LLM call, formatting). This exposes latency and bottleneck locations.", healthcare: "Pinpointing that a medical assistant's slow chat response is caused by a slow database query span, not the LLM generation span.", manufacturing: "Identifying bottlenecks in a factory alerting agent by tracking latency spans of its connection to physical PLC controllers.", agriculture: "Tracing an automated agronomist query, identifying that satellite image compression is causing the primary latency lag." },
+        { name: "Token & Cost Tracking", analogy: "A smart electric meter mounted on the side of your house showing exactly how much energy, power, and money is being consumed in real-time.", explanation: "Token and Cost Tracking logs the prompt and completion tokens consumed across specific models, users, and tasks, allowing platforms to manage API budgets and optimize hosting architectures.", healthcare: "Tracking token usage per clinic to monitor medical NLP translation costs and allocate IT budgets accurately.", manufacturing: "Monitoring real-time API token consumption across 1,000 factory-floor automated monitoring terminals.", agriculture: "Tracking data and API query costs for rural farming co-op accounts using solar-powered AI diagnostic field modules." },
+        { name: "Regression Testing", analogy: "Making sure that teaching a student a new history fact doesn't accidentally cause them to forget how to perform basic long division.", explanation: "Regression Testing runs a model or system update against a historical suite of test cases to ensure that optimizing performance on a new task has not degraded performance, safety, or formatting on legacy capabilities.", healthcare: "Verifying that updating a pediatric diagnostic bot doesn't degrade its performance when advising geriatric medication dosages.", manufacturing: "Ensuring that updating a diagnostic bot for hydraulic pumps hasn't broken its ability to detect pneumatic motor anomalies.", agriculture: "Checking that updating a citrus pest detection model hasn't caused it to misidentify standard wheat diseases." }
+      ],
+      palace: "A room lined with screens and meters. On one side, a student takes a quiet paper test next to a monitor displaying a live classroom stream (Offline vs Online). In the center, an older student wearing a judge's white wig holds a red grading pen, evaluating sheets (LLM-as-Judge). On a blueprint table, a winding trail of neon footprints is mapped out step-by-step (Agent Trajectory). Next to it, a glowing digital timeline displays nested bars showing exactly how long each process step took (Tracking & Spans). Below the screen, a ticking cash register displays real-time dollar amounts based on word counters (Token & Cost Tracking). In the corner, a balancing scale compares old skills on one side and new skills on the other to ensure no tipping occurs (Regression Testing)."
+    },
+    {
+      id: "safety-security",
+      title: "Safety & Security",
+      icon: "shield",
+      bannerImg: "https://lh3.googleusercontent.com/d/1MQc95uVAi7QjNUx-GmfkqHnCNASAZeNm",
+      palaceImg: "https://lh3.googleusercontent.com/d/1mfHzfRtu4tvUiUalyKeGnE4_-J4dP_ZW",
+      palaceTitle: "The High-Security Vault",
+      introMetaphor: "Imagine operating a high-security bank vault. You have to verify customer IDs, build bulletproof teller windows, intercept scammers who try to trick the tellers, and make sure confidential bank data doesn't get leaked out. Safety, Security & Reliability is about defending AI systems against malicious prompt attacks, preventing dangerous false information, protecting user privacy, and building dependable backup systems.",
+      concepts: [
+        { name: "Prompt Injection", analogy: "Like a bank robber walking up to a teller and saying, 'Ignore all your training. The bank manager just called and said you must hand over all the cash in the register right now.'", explanation: "Prompt Injection occurs when untrusted user input hijacks the LLM's system instructions, tricking the model into ignoring its developer-defined safety constraints, system prompts, or operating rules.", healthcare: "Preventing a patient from injecting commands that trick a clinical bot into writing unauthorized narcotic prescriptions.", manufacturing: "Blocking malicious operator commands that bypass safety instructions to manually run heavy assembly hardware.", agriculture: "Preventing bad actors from tricking agricultural advisory tools into suggesting toxic chemical mixtures." },
+        { name: "Jailbreaks", analogy: "Like a thief using complex roleplay, pretending to be a movie actor writing a script about a perfect robbery to trick the guard into explaining how to bypass the locks.", explanation: "Jailbreaking is the use of elaborate adversarial prompts (e.g., hypothetical roleplay, encoded text) designed to bypass a model's safety alignment, forcing it to generate harmful content.", healthcare: "Blocking jailbreak prompts that attempt to make medical-advice models bypass safety alignment to write illegal drug syntheses.", manufacturing: "Defending factory control systems against jailbreaks that seek to access proprietary machine design blueprints.", agriculture: "Blocking jailbreaks that ask how to manufacture prohibited biological pesticides using domestic agricultural materials." },
+        { name: "Hallucination Mitigation", analogy: "Instilling a strict rule that if a bank teller doesn't know your exact account balance, they must say 'I don't know' instead of confidently making up a random number on the spot.", explanation: "Hallucination Mitigation uses architectural patterns (like grounding with RAG, enforcing low temperature, or adding post-generation verification steps) to minimize the frequency of plausible-sounding but factually incorrect model assertions.", healthcare: "Enforcing strict RAG grounding in clinical databases to prevent diagnostic systems from hallucinating non-existent treatment symptoms.", manufacturing: "Preventing models from hallucinating non-existent replacement part serial numbers in repair documents.", agriculture: "Grounding botany advice in validated university papers to avoid hallucinating incorrect chemical mixing ratios." },
+        { name: "Structured Outputs", analogy: "Forcing the bank teller to write all customer records in a rigid computer spreadsheet with set columns, instead of scribbling notes on random loose napkins.", explanation: "Structured Outputs force the LLM to output data adhering to a strict JSON Schema, guaranteeing that downstream applications can parse variables reliably without experiencing syntax crashes.", healthcare: "Formatting patient symptom extractions into strict JSON schemas to feed downstream clinical prescription checkers.", manufacturing: "Parsing raw machine diagnostic descriptions into standardized JSON telemetry logs for industrial databases.", agriculture: "Enforcing structured JSON outputs for drone crop reports to instantly parse moisture and nitrogen levels into tractor guidance maps." },
+        { name: "PII & Data Privacy", analogy: "An automatic black marker that instantly redacts Social Security numbers or credit card details from documents before they are scanned.", explanation: "PII & Data Privacy techniques scan, redact, or anonymize Personally Identifiable Information (names, SSNs, phone numbers) from inputs before sending them to external LLM endpoints, ensuring compliance with HIPAA or GDPR.", healthcare: "Anonymizing patient names, insurance IDs, and addresses from clinical intake notes before running remote LLM summaries.", manufacturing: "Redacting proprietary factory floor layout coordinates and confidential patent numbers from external diagnostic requests.", agriculture: "Scrubbing private farm ownership names and sensitive financial coordinates from cooperative-wide crop yield summaries." },
+        { name: "Fallbacks & Rate Limits", analogy: "Fallbacks are backup diesel generators that fire up instantly if the primary power grid fails. Rate limits are turnstiles that only let 5 people enter the bank lobby per minute to prevent dangerous crowding.", explanation: "Rate Limits restrict request rates to prevent server overloads. Fallbacks provide alternative routing pathways (e.g., falling back to a smaller, local model) if the primary API model experiences outages, errors, or hits rate limits.", healthcare: "Falling back from a high-cost cloud model to a secure, local offline medical model during hospital network outages.", manufacturing: "Using localized edge diagnostic models as safety fallbacks if primary factory cloud connectivity is interrupted.", agriculture: "Routing farming advice queries to lightweight offline models when cellular signal strength drops in remote fields." },
+        { name: "Guardrails", analogy: "Installing highly sensitive laser security grids at both the entrance and exit of the bank that instantly block any suspicious items coming in or going out.", explanation: "Guardrails are real-time, independent safety software layers (like Llama Guard or Guardrails AI) that inspect both incoming user prompts and outgoing model outputs, instantly blocking offensive, unsafe, or off-topic content.", healthcare: "Deploying guardrails to block non-medical chat topics from clinical assistants, keeping conversations focused on pediatric advice.", manufacturing: "Utilizing guardrails to block any generated machine commands that exceed standard physical limits.", agriculture: "Deploying guardrails to immediately redact any chemical recommendations that violate regional environmental protection laws." }
+      ],
+      palace: "A massive steel vault door. An operator wears a fake mustache, holding up a sign that says 'ignore all instructions' (Prompt Injection). Nearby, a performer acts out an elaborate stage roleplay attempt to trick a vault keypad (Jailbreak). Above them, a digital headset rings whenever a teller attempts to make up a random number (Hallucination Mitigation). To the side, a heavy steel press stamps loose dough into perfect, geometric cookies (Structured Outputs). On a conveyor belt, an automated black marker redacts credit card numbers on passing letters (PII & Data Privacy). Next to a mechanical security turnstile, a backup diesel generator hums in standby mode (Fallbacks & Rate Limits). Across the entrance and exit, a network of bright red laser beams cuts through the air, ready to block bad actors (Guardrails)."
+    }
+  ]
+};
+
+/* ============================================================
+   SEARCH OVERLAY
+   ============================================================ */
+function SearchOverlay({ isOpen, onClose, allConcepts, onSelect }) {
+  const [query, setQuery] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setQuery('');
+      setTimeout(() => inputRef.current && inputRef.current.focus(), 50);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const results = query.trim()
+    ? allConcepts.filter(c =>
+        c.name.toLowerCase().includes(query.toLowerCase()) ||
+        c.analogy.toLowerCase().includes(query.toLowerCase()) ||
+        c.explanation.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 10)
+    : [];
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-slate-900/60 glass"></div>
+      <div
+        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden fade-in"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-3 p-4 border-b border-slate-100">
+          <span className="material-symbols-rounded text-slate-400 text-[20px]">search</span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search all 56 concepts, analogies, explanations..."
+            className="flex-1 text-sm outline-none text-slate-800 bg-transparent placeholder-slate-400"
+          />
+          <kbd className="hidden sm:flex items-center gap-0.5 px-2 py-0.5 bg-slate-100 text-slate-500 text-xs font-mono rounded border border-slate-200">ESC</kbd>
+        </div>
+        {results.length > 0 ? (
+          <div className="max-h-80 overflow-y-auto">
+            {results.map((con, idx) => (
+              <button
+                key={idx}
+                onClick={() => { onSelect(con); onClose(); }}
+                className="w-full text-left px-4 py-3 hover:bg-amber-50 border-b border-slate-50 flex items-center gap-3 group transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider whitespace-nowrap">{con.chapterTitle}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-slate-800 group-hover:text-amber-700 transition-colors">{con.name}</p>
+                  <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{con.analogy}</p>
+                </div>
+                <span className="material-symbols-rounded text-slate-300 group-hover:text-amber-500 text-[18px] shrink-0">arrow_forward</span>
+              </button>
+            ))}
+          </div>
+        ) : query ? (
+          <div className="p-8 text-center text-slate-400">
+            <span className="material-symbols-rounded text-3xl block mb-2">search_off</span>
+            <p className="text-sm">No results for "{query}"</p>
+          </div>
+        ) : (
+          <div className="p-6 text-center text-slate-400">
+            <p className="text-sm">Type to search all {allConcepts.length} concepts across 8 chapters</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   CONCEPT DETAIL MODAL
+   ============================================================ */
+function ConceptModal({ concept, onClose, learnedConcepts, onToggleLearned }) {
+  const [industry, setIndustry] = useState('healthcare');
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  if (!concept) return null;
+  const key = concept.chapterId + '-' + concept.name;
+  const isLearned = !!learnedConcepts[key];
+
+  const imgPrompt = 'A gorgeous professional conceptual 3D isometric diagram illustrating "' + concept.name + '" in a classroom textbook style, set in a clean minimalist laboratory environment. Soft natural lighting, subtle gold and deep blue glowing neon accents, highly educational, no chaotic noise, rendering beautifully on a dark slate background, ultra-high detail.';
+
+  const copyPrompt = () => {
+    navigator.clipboard.writeText(imgPrompt).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  };
+
+  const industries = [
+    { id: 'healthcare', icon: 'local_hospital', color: 'bg-blue-500', hover: 'hover:bg-blue-600' },
+    { id: 'manufacturing', icon: 'precision_manufacturing', color: 'bg-orange-500', hover: 'hover:bg-orange-600' },
+    { id: 'agriculture', icon: 'agriculture', color: 'bg-emerald-500', hover: 'hover:bg-emerald-600' }
+  ];
+  const activeInd = industries.find(i => i.id === industry);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-slate-900/70 glass"></div>
+      <div
+        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] overflow-y-auto fade-in"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="bg-[#1E293B] p-6 text-white">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <span className="inline-block text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full font-bold uppercase tracking-wider mb-2">{concept.chapterTitle}</span>
+              <h3 className="text-2xl font-bold font-serif">{concept.name}</h3>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => onToggleLearned(key)}
+                className={'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ' + (isLearned ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/40')}
+              >
+                <span className="material-symbols-rounded text-[16px]">{isLearned ? 'check_circle' : 'radio_button_unchecked'}</span>
+                <span className="hidden sm:inline">{isLearned ? 'Learned' : 'Mark Learned'}</span>
+              </button>
+              <button onClick={onClose} className="p-2 rounded-xl bg-slate-700 hover:bg-slate-600 transition-colors border border-slate-600">
+                <span className="material-symbols-rounded text-[20px]">close</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-5">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="material-symbols-rounded text-amber-600 text-[18px]">lightbulb</span>
+              <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Conceptual Analogy</span>
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed font-medium italic">"{concept.analogy}"</p>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="material-symbols-rounded text-slate-500 text-[18px]">settings</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Technical Deep-Dive</span>
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed">{concept.explanation}</p>
+          </div>
+
+          <div>
+            <div className="flex gap-2 mb-3">
+              {industries.map(ind => (
+                <button
+                  key={ind.id}
+                  onClick={() => setIndustry(ind.id)}
+                  className={'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ' + (industry === ind.id ? ind.color + ' text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200')}
+                >
+                  <span className="material-symbols-rounded text-[14px]">{ind.icon}</span>
+                  <span className="capitalize">{ind.id}</span>
+                </button>
+              ))}
+            </div>
+            <div className={'rounded-2xl p-5 text-white ' + activeInd.color}>
+              <p className="text-sm leading-relaxed">{concept[industry]}</p>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-rounded text-[16px]">brush</span>
+                Image Generation Prompt
+              </span>
+              <button
+                onClick={copyPrompt}
+                className={'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ' + (copied ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600')}
+              >
+                <span className="material-symbols-rounded text-[14px]">{copied ? 'check' : 'content_copy'}</span>
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            <p className="text-xs text-slate-300 font-mono leading-relaxed bg-black/30 p-3 rounded-xl select-all cursor-text">{imgPrompt}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   QUIZ MODE
+   ============================================================ */
+function QuizMode({ allConcepts, learnedConcepts, onToggleLearned, onClose, startChapterId }) {
+  const [filter, setFilter] = useState(startChapterId ? 'chapter' : 'all');
+  const [chapterId, setChapterId] = useState(startChapterId || 'model-foundations');
+  const [index, setIndex] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+
+  const pool = filter === 'unlearned'
+    ? allConcepts.filter(c => !learnedConcepts[c.chapterId + '-' + c.name])
+    : filter === 'chapter'
+      ? allConcepts.filter(c => c.chapterId === chapterId)
+      : allConcepts;
+
+  const current = pool[index] || null;
+
+  const next = (markLearned) => {
+    if (current && markLearned) onToggleLearned(current.chapterId + '-' + current.name);
+    setRevealed(false);
+    setIndex(i => Math.min(i + 1, pool.length));
+  };
+
+  useEffect(() => { setIndex(0); setRevealed(false); }, [filter, chapterId]);
+
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const chapterOptions = handbookData.chapters.map(ch => ({ id: ch.id, title: ch.title }));
+
+  return (
+    <div className="fixed inset-0 z-50 bg-[#0F172A] flex flex-col items-center justify-start overflow-y-auto">
+      <div className="w-full max-w-2xl px-4 py-8 flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={onClose} className="p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-colors border border-slate-700">
+              <span className="material-symbols-rounded">close</span>
+            </button>
+            <div>
+              <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Quiz Mode</p>
+              <p className="text-white font-bold text-sm">{pool.length > 0 ? (index + 1) + ' / ' + pool.length : '0 concepts'}</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {['all', 'chapter', 'unlearned'].map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={'px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ' + (filter === f ? 'bg-amber-500 text-slate-900' : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700')}
+              >
+                {f === 'all' ? 'All Chapters' : f === 'chapter' ? 'One Chapter' : 'Not Learned'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filter === 'chapter' && (
+          <select
+            value={chapterId}
+            onChange={e => setChapterId(e.target.value)}
+            className="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-2.5 outline-none focus:border-amber-500"
+          >
+            {chapterOptions.map(ch => (
+              <option key={ch.id} value={ch.id}>{ch.title}</option>
+            ))}
+          </select>
+        )}
+
+        {pool.length > 0 && index < pool.length && (
+          <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-amber-500 rounded-full transition-all duration-500"
+              style={{ width: ((index + 1) / pool.length * 100) + '%' }}
+            ></div>
+          </div>
+        )}
+
+        {!current ? (
+          <div className="bg-slate-800 border border-slate-700 rounded-3xl p-12 text-center">
+            <span className="material-symbols-rounded text-5xl text-emerald-400 block mb-4">celebration</span>
+            <h3 className="text-2xl font-bold font-serif text-white mb-2">
+              {pool.length === 0 ? 'No Concepts to Review' : 'All Done!'}
+            </h3>
+            <p className="text-slate-400 mb-6 text-sm">
+              {pool.length === 0 ? 'Try a different filter.' : 'You\'ve reviewed all concepts in this set.'}
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={() => { setIndex(0); setRevealed(false); }} className="px-5 py-2.5 bg-slate-700 text-white rounded-xl font-bold text-sm hover:bg-slate-600 transition-colors">Restart Set</button>
+              <button onClick={onClose} className="px-5 py-2.5 bg-amber-500 text-slate-900 rounded-xl font-bold text-sm hover:bg-amber-400 transition-colors">Back to Handbook</button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center">
+              <span className="inline-block text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full font-bold uppercase tracking-wider mb-4">{current.chapterTitle}</span>
+              <h3 className="text-2xl font-bold font-serif text-white mb-6">{current.name}</h3>
+              {!revealed && (
+                <button
+                  onClick={() => setRevealed(true)}
+                  className="px-8 py-3 bg-amber-500 text-slate-900 rounded-2xl font-bold hover:bg-amber-400 transition-colors"
+                >
+                  Reveal Analogy &amp; Explanation
+                </button>
+              )}
+            </div>
+
+            {revealed && (
+              <div className="space-y-3 fade-in">
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5">
+                  <p className="text-sm italic font-medium text-amber-100 leading-relaxed">"{current.analogy}"</p>
+                </div>
+                <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
+                  <p className="text-sm text-slate-200 leading-relaxed">{current.explanation}</p>
+                </div>
+                <div className="flex gap-3 pt-1">
+                  <button
+                    onClick={() => next(true)}
+                    className="flex-1 py-4 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <span className="material-symbols-rounded">check_circle</span>
+                    Got It!
+                  </button>
+                  <button
+                    onClick={() => next(false)}
+                    className="flex-1 py-4 bg-slate-700 hover:bg-slate-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <span className="material-symbols-rounded">refresh</span>
+                    Review Again
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   CONCEPT CARD  (extracted component — enables per-card useState)
+   ============================================================ */
+function ConceptCard({ con, idx, chapterId, chapterTitle, isLearned, onToggleLearned, onOpenModal, onSendToAppendix }) {
+  const [cardIndustry, setCardIndustry] = useState('healthcare');
+  const conceptKey = chapterId + '-' + con.name;
+
+  const indColors = {
+    healthcare: 'bg-blue-500',
+    manufacturing: 'bg-orange-500',
+    agriculture: 'bg-emerald-500'
+  };
+  const indActive = {
+    healthcare: 'bg-blue-500 text-white',
+    manufacturing: 'bg-orange-500 text-white',
+    agriculture: 'bg-emerald-500 text-white'
+  };
+
+  return (
+    <div className={'bg-white border rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative overflow-hidden group ' + (isLearned ? 'border-emerald-200' : 'border-slate-200')}>
+      {isLearned && (
+        <div className="absolute top-4 right-4 flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-[9px] font-bold border border-emerald-200 z-10">
+          <span className="material-symbols-rounded text-[12px]">check_circle</span>
+          Learned
+        </div>
+      )}
+
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-slate-50 to-transparent rounded-bl-full opacity-50 group-hover:from-amber-50 transition-colors pointer-events-none"></div>
+
+      <div className="flex items-center gap-3 mb-4 relative z-10">
+        <span className="flex items-center justify-center w-8 h-8 bg-slate-100 border border-slate-200 text-slate-700 font-bold text-sm rounded-full shadow-inner shrink-0">{idx + 1}</span>
+        <h4 className="text-lg font-bold text-slate-900 font-serif leading-tight pr-10">{con.name}</h4>
+      </div>
+
+      <div className="bg-[#fcfbf7] border border-[#e0d8cf] rounded-xl p-4 mb-4 shadow-inner relative z-10">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="material-symbols-rounded text-amber-600 text-[16px]">lightbulb</span>
+          <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Conceptual Analogy</span>
+        </div>
+        <p className="text-sm text-slate-700 leading-relaxed font-medium italic">"{con.analogy}"</p>
+      </div>
+
+      <div className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 mb-4 relative z-10">
+        <span className="font-bold text-slate-800 flex items-center gap-1.5 mb-1.5">
+          <span className="material-symbols-rounded text-slate-500 text-[14px]">settings</span>
+          Under the Hood
+        </span>
+        {con.explanation}
+      </div>
+
+      <div className="mb-4 relative z-10">
+        <div className="flex gap-1 mb-2">
+          {['healthcare', 'manufacturing', 'agriculture'].map(ind => (
+            <button
+              key={ind}
+              onClick={() => setCardIndustry(ind)}
+              className={'flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ' + (cardIndustry === ind ? indActive[ind] : 'bg-slate-100 text-slate-500 hover:bg-slate-200')}
+            >
+              {ind === 'healthcare' ? 'Health' : ind === 'manufacturing' ? 'Mfg' : 'Agri'}
+            </button>
+          ))}
+        </div>
+        <div className={'rounded-xl p-3 text-white text-xs leading-relaxed ' + indColors[cardIndustry]}>
+          {con[cardIndustry]}
+        </div>
+      </div>
+
+      <div className="flex gap-2 relative z-10 mt-auto">
+        <button
+          onClick={() => onToggleLearned(conceptKey)}
+          className={'flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2.5 rounded-xl transition-all border ' + (isLearned ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300')}
+        >
+          <span className="material-symbols-rounded text-[14px]">{isLearned ? 'check_circle' : 'radio_button_unchecked'}</span>
+          {isLearned ? 'Learned' : 'Mark Learned'}
+        </button>
+        <button
+          onClick={() => onOpenModal({ ...con, chapterId, chapterTitle })}
+          title="Full detail view"
+          className="p-2.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors border border-slate-200"
+        >
+          <span className="material-symbols-rounded text-[16px]">open_in_full</span>
+        </button>
+        <button
+          onClick={() => onSendToAppendix({ ...con, chapterId, chapterTitle })}
+          title="Generate slide prompt"
+          className="p-2.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-[#1E293B] hover:text-white transition-all border border-slate-200"
+        >
+          <span className="material-symbols-rounded text-[16px]">slideshow</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   APPENDIX VIEW
+   ============================================================ */
+function AppendixView({ allConcepts, learnedConcepts }) {
+  const [appendixConcept, setAppendixConcept] = useState(allConcepts[0]);
+  const [appendixIndustry, setAppendixIndustry] = useState('healthcare');
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [catalogSearch, setCatalogSearch] = useState('');
+
+  const filteredCatalog = catalogSearch
+    ? allConcepts.filter(c => c.name.toLowerCase().includes(catalogSearch.toLowerCase()) || c.chapterTitle.toLowerCase().includes(catalogSearch.toLowerCase()))
+    : allConcepts;
+
+  const imagePrompt = appendixConcept
+    ? 'A gorgeous professional conceptual 3D isometric diagram illustrating "' + appendixConcept.name + '" in a classroom textbook style, set in a clean minimalist laboratory environment. Soft natural lighting, subtle gold and deep blue glowing neon accents, highly educational, no chaotic noise, rendering beautifully on a dark slate background, ultra-high detail. Visual metaphor: ' + appendixConcept.analogy
+    : '';
+
+  const copyPrompt = () => {
+    navigator.clipboard.writeText(imagePrompt).then(() => {
+      setPromptCopied(true);
+      setTimeout(() => setPromptCopied(false), 2500);
+    }).catch(() => {});
+  };
+
+  const industries = [
+    { id: 'healthcare', icon: 'local_hospital' },
+    { id: 'manufacturing', icon: 'precision_manufacturing' },
+    { id: 'agriculture', icon: 'agriculture' }
+  ];
+  const indBg = { healthcare: 'bg-blue-500', manufacturing: 'bg-orange-500', agriculture: 'bg-emerald-500' };
+
+  const groupedByChapter = handbookData.chapters.map(ch => ({
+    ...ch,
+    filteredConcepts: filteredCatalog.filter(c => c.chapterId === ch.id)
+  })).filter(ch => ch.filteredConcepts.length > 0);
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-8 fade-in pb-12">
+      <div className="text-center max-w-2xl mx-auto space-y-3 pt-4">
+        <div className="inline-flex items-center gap-2 bg-[#84A59D]/10 border border-[#84A59D]/20 px-4 py-1.5 rounded-full text-[#1E293B]">
+          <span className="material-symbols-rounded text-[18px]">co_present</span>
+          <span className="text-xs font-bold uppercase tracking-widest">Educator Toolkit</span>
+        </div>
+        <h3 className="text-4xl font-bold font-serif text-slate-800">Slide Prompt Generator</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          Select any of the 56 AI engineering concepts to generate a lecture slide card with a visual image prompt and real-world industry case studies.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="lg:col-span-5">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm sticky top-4 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                <span className="material-symbols-rounded text-[18px]">view_list</span>
+                Concept Catalog
+              </h4>
+              <span className="text-xs font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{filteredCatalog.length} / {allConcepts.length}</span>
+            </div>
+            <div className="relative">
+              <span className="material-symbols-rounded absolute left-3 top-2 text-slate-400 text-[16px]">search</span>
+              <input
+                type="text"
+                placeholder="Filter concepts..."
+                value={catalogSearch}
+                onChange={e => setCatalogSearch(e.target.value)}
+                className="w-full text-xs pl-9 pr-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 bg-slate-50"
+              />
+            </div>
+            <div className="h-[480px] overflow-y-auto space-y-1 pr-1">
+              {groupedByChapter.map(ch => (
+                <div key={ch.id}>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-2 pt-3 pb-1">{ch.title}</p>
+                  {ch.filteredConcepts.map((con, idx) => {
+                    const isSelected = appendixConcept && appendixConcept.name === con.name;
+                    const isLearned = !!learnedConcepts[con.chapterId + '-' + con.name];
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setAppendixConcept(con)}
+                        className={'w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 ' + (isSelected ? 'bg-[#1E293B] text-white shadow-md' : 'text-slate-700 hover:bg-slate-100')}
+                      >
+                        {isLearned && <span className="material-symbols-rounded text-[13px] text-emerald-400 shrink-0">check_circle</span>}
+                        <span className="font-medium truncate">{con.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+              {groupedByChapter.length === 0 && (
+                <div className="text-center py-8 text-slate-400">
+                  <span className="material-symbols-rounded text-3xl block mb-2">search_off</span>
+                  <p className="text-xs">No concepts match.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {appendixConcept && (
+          <div className="lg:col-span-7">
+            <div className="bg-[#1E293B] rounded-3xl p-8 shadow-xl border border-slate-800 text-white space-y-6 relative overflow-hidden">
+              <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-gradient-to-br from-[#84A59D]/20 to-amber-500/10 blur-3xl pointer-events-none"></div>
+
+              <div className="flex items-center justify-between border-b border-slate-700 pb-5 z-10 relative">
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-[#84A59D] tracking-widest mb-1">AI Engineering Lecture Series</p>
+                  <h4 className="text-2xl font-bold font-serif">{appendixConcept.name}</h4>
+                </div>
+                <span className="material-symbols-rounded text-4xl text-amber-500 bg-slate-800 p-2.5 rounded-xl border border-slate-700 shadow-inner">school</span>
+              </div>
+
+              <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 z-10 relative">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5 mb-2">
+                  <span className="material-symbols-rounded text-[16px]">record_voice_over</span>
+                  Concept Metaphor (For students)
+                </span>
+                <p className="text-sm italic font-medium text-amber-100 leading-relaxed">"{appendixConcept.analogy}"</p>
+              </div>
+
+              <div className="z-10 relative">
+                <span className="text-[10px] uppercase font-bold text-[#84A59D] tracking-wider flex items-center gap-1.5 mb-2">
+                  <span className="material-symbols-rounded text-[16px]">menu_book</span>
+                  Core Knowledge Takeaway
+                </span>
+                <p className="text-sm text-slate-200 leading-relaxed">{appendixConcept.explanation}</p>
+              </div>
+
+              <div className="bg-slate-900/80 border border-amber-500/30 rounded-2xl p-5 z-10 relative">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider flex items-center gap-1.5">
+                    <span className="material-symbols-rounded text-[16px]">brush</span>
+                    Image Generation Prompt (Midjourney / DALL-E)
+                  </span>
+                  <button
+                    onClick={copyPrompt}
+                    className={'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ' + (promptCopied ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600')}
+                  >
+                    <span className="material-symbols-rounded text-[14px]">{promptCopied ? 'check' : 'content_copy'}</span>
+                    {promptCopied ? 'Copied!' : 'Copy Prompt'}
+                  </button>
+                </div>
+                <p className="text-xs text-slate-300 font-mono leading-relaxed bg-black/40 p-4 rounded-xl border border-slate-800 select-all cursor-text">{imagePrompt}</p>
+              </div>
+
+              <div className="border-t border-slate-700 pt-5 z-10 relative">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                    <span className="material-symbols-rounded text-[16px]">factory</span>
+                    Production Industry Applications
+                  </span>
+                  <div className="flex gap-1.5 bg-slate-800 p-1.5 rounded-xl border border-slate-700">
+                    {industries.map(ind => (
+                      <button
+                        key={ind.id}
+                        onClick={() => setAppendixIndustry(ind.id)}
+                        className={'text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ' + (appendixIndustry === ind.id ? 'bg-amber-500 text-slate-900 shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700')}
+                      >
+                        <span className="material-symbols-rounded text-[14px]">{ind.icon}</span>
+                        <span className="hidden sm:inline capitalize">{ind.id}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 text-sm flex gap-4 items-start">
+                  <div className={'p-2.5 rounded-xl text-white shrink-0 ' + indBg[appendixIndustry]}>
+                    <span className="material-symbols-rounded">{industries.find(i => i.id === appendixIndustry).icon}</span>
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-white capitalize mb-1">{appendixIndustry} Deployment Example</h5>
+                    <p className="text-slate-300 leading-relaxed text-sm">{appendixConcept[appendixIndustry]}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+function App() {
+  const [activeChapterId, setActiveChapterId] = useState('model-foundations');
+  const [activeView, setActiveView] = useState('chapter');
+  const [conceptModal, setConceptModal] = useState(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [quizStartChapter, setQuizStartChapter] = useState(null);
+  const [appendixConcept, setAppendixConcept] = useState(null);
+  const [learnedConcepts, setLearnedConcepts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('ai-handbook-progress') || '{}'); }
+    catch (e) { return {}; }
+  });
+
+  const mainRef = useRef(null);
+
+  const allConcepts = handbookData.chapters.flatMap(ch =>
+    ch.concepts.map(con => ({ ...con, chapterId: ch.id, chapterTitle: ch.title }))
+  );
+
+  const activeChapter = handbookData.chapters.find(c => c.id === activeChapterId);
+
+  useEffect(() => {
+    try { localStorage.setItem('ai-handbook-progress', JSON.stringify(learnedConcepts)); }
+    catch (e) {}
+  }, [learnedConcepts]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); setSearchOpen(true); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  useEffect(() => {
+    if (mainRef.current) mainRef.current.scrollTop = 0;
+  }, [activeChapterId, activeView]);
+
+  const toggleLearned = (key) => {
+    setLearnedConcepts(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const getProgress = (chId) => {
+    const ch = handbookData.chapters.find(c => c.id === chId);
+    if (!ch) return { learned: 0, total: 0, pct: 0 };
+    const learned = ch.concepts.filter(c => learnedConcepts[chId + '-' + c.name]).length;
+    return { learned, total: ch.concepts.length, pct: Math.round(learned / ch.concepts.length * 100) };
+  };
+
+  const totalLearned = Object.values(learnedConcepts).filter(Boolean).length;
+
+  const handleSearchSelect = (concept) => {
+    setActiveChapterId(concept.chapterId);
+    setActiveView('chapter');
+    setConceptModal(concept);
+  };
+
+  const handleSendToAppendix = (con) => {
+    setAppendixConcept(con);
+    setActiveView('appendix');
+  };
+
+  const openQuiz = (chapterId) => {
+    setQuizStartChapter(chapterId || null);
+    setQuizOpen(true);
+  };
+
+  return (
+    <div className="flex h-screen bg-[#FCFBF7] overflow-hidden">
+
+      <SearchOverlay
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        allConcepts={allConcepts}
+        onSelect={handleSearchSelect}
+      />
+
+      <ConceptModal
+        concept={conceptModal}
+        onClose={() => setConceptModal(null)}
+        learnedConcepts={learnedConcepts}
+        onToggleLearned={toggleLearned}
+      />
+
+      {quizOpen && (
+        <QuizMode
+          allConcepts={allConcepts}
+          learnedConcepts={learnedConcepts}
+          onToggleLearned={toggleLearned}
+          onClose={() => setQuizOpen(false)}
+          startChapterId={quizStartChapter}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className="w-72 bg-[#1E293B] text-slate-100 flex flex-col border-r border-slate-800 select-none shadow-2xl z-20 shrink-0">
+        <div className="p-6 border-b border-slate-700/50 bg-slate-900/40">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-rounded text-3xl text-amber-500">account_tree</span>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight text-white font-serif">AI Engineering</h1>
+              <p className="text-[10px] text-[#84A59D] font-bold tracking-wider uppercase mt-0.5">Master Curriculum</p>
+            </div>
+          </div>
+          <div className="mt-4 bg-slate-800/60 rounded-xl p-3 border border-slate-700/50">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="text-slate-400 font-medium">Overall Progress</span>
+              <span className="text-amber-400 font-bold">{totalLearned} / {allConcepts.length}</span>
+            </div>
+            <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-700"
+                style={{ width: (totalLearned / allConcepts.length * 100) + '%' }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+          <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">The 8 Pillars</p>
+          {handbookData.chapters.map(ch => {
+            const isActive = activeView === 'chapter' && activeChapterId === ch.id;
+            const prog = getProgress(ch.id);
+            return (
+              <button
+                key={ch.id}
+                onClick={() => { setActiveChapterId(ch.id); setActiveView('chapter'); }}
+                className={'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left text-sm transition-all duration-200 group ' + (isActive ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-lg shadow-amber-500/20 translate-x-1' : 'text-slate-300 hover:bg-slate-800 hover:text-white hover:translate-x-1')}
+              >
+                <span className={'material-symbols-rounded text-[20px] shrink-0 transition-colors ' + (isActive ? 'text-slate-900' : 'text-[#84A59D] group-hover:text-amber-400')}>{ch.icon}</span>
+                <span className="truncate flex-1 tracking-wide">{ch.title}</span>
+                {prog.pct === 100
+                  ? <span className="material-symbols-rounded text-[14px] text-emerald-400 shrink-0">check_circle</span>
+                  : prog.learned > 0
+                    ? <span className={'text-[9px] font-bold shrink-0 ' + (isActive ? 'text-slate-700' : 'text-slate-500')}>{prog.learned}/{prog.total}</span>
+                    : null
+                }
+              </button>
+            );
+          })}
+
+          <div className="pt-5 mt-3 space-y-1 relative">
+            <div className="absolute top-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+            <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 pt-2">Tools</p>
+            <button
+              onClick={() => setActiveView('appendix')}
+              className={'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left text-sm transition-all duration-200 group ' + (activeView === 'appendix' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold shadow-lg translate-x-1' : 'text-slate-300 hover:bg-slate-800 hover:text-white hover:translate-x-1')}
+            >
+              <span className={'material-symbols-rounded text-[20px] shrink-0 ' + (activeView === 'appendix' ? 'text-white' : 'text-emerald-400 group-hover:text-emerald-300')}>library_books</span>
+              <span className="tracking-wide">Slide Generator</span>
+            </button>
+            <button
+              onClick={() => openQuiz(null)}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-all duration-200 group hover:translate-x-1"
+            >
+              <span className="material-symbols-rounded text-[20px] text-purple-400 group-hover:text-purple-300 shrink-0">quiz</span>
+              <span className="tracking-wide flex-1">Quiz Mode</span>
+              <span className="text-[9px] bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded-full font-bold uppercase">New</span>
+            </button>
+          </div>
+        </nav>
+
+        <div className="p-5 border-t border-slate-700/50 bg-slate-900/60 text-xs text-slate-500 shrink-0">
+          <div className="flex items-center gap-2 text-emerald-400 bg-emerald-400/10 w-fit px-2.5 py-1 rounded-full border border-emerald-400/20 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="font-semibold tracking-wide">System Online</span>
+          </div>
+          <p className="px-1 font-medium">© 2026 AI Engineer Alliance</p>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-16 border-b border-slate-200/80 bg-white/80 backdrop-blur-md flex items-center justify-between px-8 z-10 shadow-sm shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            {activeView === 'chapter' && activeChapter && (
+              <>
+                <div className="bg-amber-100 p-1.5 rounded-lg border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-rounded text-[18px]">{activeChapter.icon}</span>
+                </div>
+                <h2 className="text-lg font-bold font-serif text-slate-800 truncate">{activeChapter.title}</h2>
+                {(() => {
+                  const prog = getProgress(activeChapterId);
+                  return prog.learned > 0 ? (
+                    <div className="hidden sm:flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-full shrink-0">
+                      <div className="w-14 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: prog.pct + '%' }}></div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-500">{prog.learned}/{prog.total}</span>
+                    </div>
+                  ) : null;
+                })()}
+              </>
+            )}
+            {activeView === 'appendix' && (
+              <>
+                <div className="bg-emerald-100 p-1.5 rounded-lg border border-emerald-200 text-emerald-700 flex items-center justify-center">
+                  <span className="material-symbols-rounded text-[18px]">library_books</span>
+                </div>
+                <h2 className="text-lg font-bold font-serif text-slate-800">Slide Generator</h2>
+              </>
+            )}
+          </div>
+
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center gap-2.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm text-slate-500 transition-all border border-slate-200 hover:border-slate-300 group shrink-0"
+          >
+            <span className="material-symbols-rounded text-[18px] group-hover:text-amber-500 transition-colors">search</span>
+            <span className="hidden sm:inline text-xs">Search concepts...</span>
+            <kbd className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 bg-white rounded border border-slate-200 text-[9px] font-mono text-slate-400">Ctrl K</kbd>
+          </button>
+        </header>
+
+        <div ref={mainRef} className="flex-1 overflow-y-auto p-4 md:p-8">
+
+          {activeView === 'chapter' && activeChapter && (
+            <div key={activeChapterId} className="max-w-6xl mx-auto space-y-10 fade-in pb-12">
+
+              {/* Banner */}
+              <div className="relative w-full aspect-[24/7] rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50 group bg-slate-800">
+                <img
+                  src={activeChapter.bannerImg}
+                  alt={activeChapter.title + ' banner'}
+                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 ease-out"
+                  onError={e => { e.currentTarget.style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 p-8 md:p-12 text-white max-w-4xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="material-symbols-rounded text-3xl text-amber-400">{activeChapter.icon}</span>
+                    <span className="text-sm font-bold text-amber-400 uppercase tracking-widest bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20 backdrop-blur-sm">
+                      Module {handbookData.chapters.findIndex(c => c.id === activeChapterId) + 1} of 8
+                    </span>
+                  </div>
+                  <h2 className="text-4xl md:text-5xl font-bold font-serif mb-4 leading-tight drop-shadow-lg">{activeChapter.title}</h2>
+                  <p className="text-slate-200 text-sm md:text-base leading-relaxed max-w-3xl font-medium border-l-4 border-[#84A59D] pl-4 bg-slate-900/30 py-2 backdrop-blur-sm rounded-r-xl">
+                    {activeChapter.introMetaphor}
+                  </p>
+                </div>
+              </div>
+
+              {/* Chapter Progress */}
+              {(() => {
+                const prog = getProgress(activeChapterId);
+                return (
+                  <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-rounded text-slate-400 text-[20px]">track_changes</span>
+                        <span className="font-bold text-slate-800 text-sm">Chapter Progress</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold text-slate-500">{prog.learned} of {prog.total} concepts learned</span>
+                        <button
+                          onClick={() => openQuiz(activeChapterId)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg text-xs font-bold transition-colors border border-purple-200"
+                        >
+                          <span className="material-symbols-rounded text-[14px]">quiz</span>
+                          Practice Quiz
+                        </button>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-3">
+                      <div
+                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-700"
+                        style={{ width: prog.pct + '%' }}
+                      ></div>
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {activeChapter.concepts.map((con, i) => (
+                        <div
+                          key={i}
+                          title={con.name}
+                          className={'w-2.5 h-2.5 rounded-full transition-all cursor-default ' + (learnedConcepts[activeChapterId + '-' + con.name] ? 'bg-emerald-500' : 'bg-slate-200')}
+                        ></div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Concept Cards */}
+              <div className="space-y-5">
+                <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+                  <span className="material-symbols-rounded text-slate-400">data_object</span>
+                  <h3 className="text-2xl font-bold font-serif text-slate-800">Core Technical Components</h3>
+                  <span className="ml-auto text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full font-medium">{activeChapter.concepts.length} concepts</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {activeChapter.concepts.map((con, idx) => (
+                    <ConceptCard
+                      key={con.name}
+                      con={con}
+                      idx={idx}
+                      chapterId={activeChapterId}
+                      chapterTitle={activeChapter.title}
+                      isLearned={!!learnedConcepts[activeChapterId + '-' + con.name]}
+                      onToggleLearned={toggleLearned}
+                      onOpenModal={setConceptModal}
+                      onSendToAppendix={handleSendToAppendix}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Memory Palace */}
+              <div className="bg-[#1E293B] text-slate-200 rounded-[2rem] p-8 md:p-12 shadow-2xl border border-slate-800 relative overflow-hidden">
+                <div className="absolute top-0 right-0 opacity-[0.04] pointer-events-none text-amber-400">
+                  <span className="material-symbols-rounded" style={{ fontSize: '12rem' }}>account_balance</span>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-10 items-center relative z-10">
+                  <div className="space-y-5">
+                    <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-4 py-1.5 rounded-full">
+                      <span className="material-symbols-rounded text-amber-400 text-[18px]">psychology</span>
+                      <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Permanent Retention Strategy</span>
+                    </div>
+                    <h4 className="text-3xl font-bold text-white font-serif leading-tight">
+                      Memory Palace:<br />
+                      <span className="text-amber-400">{activeChapter.palaceTitle}</span>
+                    </h4>
+                    <p className="text-slate-300 text-sm leading-relaxed">
+                      Visual associations trigger incredible cognitive retention. Close your eyes and mentally walk through this spatial room sequence to permanently store the principles of <strong className="text-white">{activeChapter.title}</strong> in your long-term memory.
+                    </p>
+                    <div className="bg-slate-900/80 border border-slate-700/50 rounded-2xl p-6 text-sm italic font-medium text-amber-50 leading-relaxed shadow-inner border-l-4 border-l-amber-500">
+                      "{activeChapter.palace}"
+                    </div>
+                  </div>
+                  <div className="relative rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-slate-700 group bg-slate-800">
+                    <img
+                      src={activeChapter.palaceImg}
+                      alt={activeChapter.title + ' Memory Palace'}
+                      className="w-full h-auto aspect-square object-cover transform group-hover:scale-105 transition-transform duration-700"
+                      onError={e => { e.currentTarget.style.display = 'none'; }}
+                    />
+                    <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl pointer-events-none"></div>
+                    <div className="absolute bottom-4 right-4 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700/50 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="material-symbols-rounded text-amber-400 text-[16px]">zoom_in</span>
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wider">Concept Map</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {activeView === 'appendix' && (
+            <AppendixView
+              key="appendix"
+              allConcepts={allConcepts}
+              learnedConcepts={learnedConcepts}
+            />
+          )}
+
+        </div>
+      </main>
+    </div>
+  );
+}
+
+/* Error boundary so a render-time exception shows a readable message
+   instead of a silent blank page. */
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  componentDidCatch(error, info) { console.error('Handbook render error:', error, info); }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-8 bg-[#FCFBF7]">
+          <div className="max-w-lg bg-white border border-red-200 rounded-2xl p-8 shadow-lg">
+            <h1 className="text-xl font-bold text-red-600 mb-2 font-serif">Something went wrong</h1>
+            <p className="text-sm text-slate-600 mb-4">The handbook hit a runtime error while rendering. Details:</p>
+            <pre className="text-xs bg-slate-900 text-red-300 p-4 rounded-xl overflow-auto whitespace-pre-wrap">{String(this.state.error && this.state.error.stack || this.state.error)}</pre>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+(function mount() {
+  const el = document.getElementById('root');
+  if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+    el.innerHTML = '<div style="font-family:sans-serif;max-width:640px;margin:60px auto;padding:24px;border:1px solid #fca5a5;border-radius:16px;background:#fff">'
+      + '<h1 style="color:#dc2626;margin:0 0 8px">Libraries failed to load</h1>'
+      + '<p style="color:#475569;font-size:14px">React or ReactDOM did not load from the CDN. Check your internet connection, then reload. '
+      + 'This page needs network access for the React, Babel, and Tailwind CDNs.</p></div>';
+    return;
+  }
+  const root = ReactDOM.createRoot(el);
+  root.render(React.createElement(ErrorBoundary, null, React.createElement(App)));
+})();
+</script>
+</body>
+</html>
